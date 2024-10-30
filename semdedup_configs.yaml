@@ -1,17 +1,16 @@
-
-save_folder: "<your path>"
-sorted_clusters_path: "<your path>/sorted_clusters"
-# -- number of clusters
-num_clusters: 50000
-embs_memory_loc: "<your path>.npy"
-# -- dataset size
-dataset_size: <dataset_size>
-# -- embeddings size
-emd_size: 512
-# -- which example to keep from each group of duplicates
+save_loc: "semdedup"
+clusters_per_job: 200
+embs_memory_loc: "emb.npy"
+dataset_size: 527678
+emd_size: 384
+num_clusters: 200
+sorted_clusters_path: "sorted_clusters"
 which_to_keep: "hard"
-# -- seed
 seed: 1234
-# -- largest cluster size the memory is large enough to process. If the cluster size is larger than it, we will devide the cluster into small clusters and process each one separately.
+eps_list:
+  - 0.7
+  - 0.8
+  - 0.9
+  # - 0.05
+  # - 0.1
 largest_cluster_size_to_process: 10000000
-

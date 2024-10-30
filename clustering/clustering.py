@@ -4,19 +4,20 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-import faiss
-import torch
-import time
-import numpy as np
+import argparse
 import logging
 import os
-import pickle
-import argparse
-import yaml
-import pprint
-import submitit
 import pathlib
-from typing import Union, Optional
+import pickle
+import pprint
+import time
+from typing import Optional, Union
+
+import faiss
+import numpy as np
+import submitit
+import torch
+import yaml
 from utils import get_logger
 
 
@@ -49,7 +50,6 @@ def compute_centroids(
     logger: logging.Logger = None,
     verbose: bool = True,
 ):
-
     """
     Runs K-means clustering on the input data using "faiss" and saves the following output files:
 
@@ -126,9 +126,9 @@ def compute_centroids(
         )
         with open(kmeans_obj_file_loc, "rb") as file:
             kmeans_index = pickle.load(file)
-            if use_gpu:
-                # -- move kmeans index to gpu
-                kmeans_index = faiss_index_to_gpu(kmeans_index)
+            # if use_gpu:
+            # -- move kmeans index to gpu
+            # kmeans_index = faiss_index_to_gpu(kmeans_index)
             kmeans.index = kmeans_index
 
     ## -- Step 2) Find the nearest centroid for each data point, l2 distance search
