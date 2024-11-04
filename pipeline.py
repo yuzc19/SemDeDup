@@ -4,6 +4,7 @@ import random
 import numpy as np
 import yaml
 from clustering.clustering import compute_centroids
+from datasets import load_from_disk, concatenate_datasets
 from clustering.sort_clusters import assign_and_sort_clusters
 from datasets import Dataset
 from extract_dedup_data import extract_pruned_data
@@ -14,8 +15,10 @@ logger.addHandler(logging.StreamHandler())
 
 confg_file = "clustering/configs/openclip/clustering_configs.yaml"
 ## -- Load kmeans clustering parameters from configs file
+print("Loading configuration file...")
 with open(confg_file, "r") as y_file:
     params = yaml.load(y_file, Loader=yaml.FullLoader)
+print("Configuration file loaded.")
 
 ## -- Fix the seed
 SEED = params["seed"]
@@ -26,32 +29,21 @@ dataset_size = params["dataset_size"]
 emb_size = params["emb_size"]
 path_str_type = params["path_str_type"]
 
-cc = False
-asc = False
+cc = True
+asc = True
 epd = False
 
 if cc:
-    dataset_path = "../data/fineweb/sample-350BT/train/0_embedding.jsonl"
-    dataset = Dataset.from_json(dataset_path)
-    embedding_matrix = np.array(dataset["__embedding"])
+    print("Loading datasets...")
+    dataset = concatenate_datasets([load_from_disk(f"/data/datasets/hf_cache/data/fineweb/sample-350BT/train_bge_micro_embeddings/{i}") for i in range(8)])
+    #test
+    # dataset = concatenate_datasets([load_from_disk(f"/data/datasets/hf_cache/data/fineweb/sample-350BT/train_bge_micro_embeddings/{i}") for i in range(1)])
+    # dataset = dataset.select(range(1000)) # test
+    print("Datasets loaded.")
+
+    embedding_matrix = np.array(dataset["__embedding"], dtype=np.float32)
     dataset_size = len(embedding_matrix)
-    # embedding_matrix = embedding_matrix[:dataset_size]
-
-    # emb_array = np.memmap(
-    #     emb_memory_loc,
-    #     dtype="float32",
-    #     mode="w+",
-    #     shape=(dataset_size, emb_size),
-    # )
-    # emb_array[:] = embedding_matrix[:]
-    # emb_array.flush()
-
-    # emb_memory = np.memmap(
-    #     emb_memory_loc,
-    #     dtype="float32",
-    #     mode="r",
-    #     shape=(dataset_size, emb_size),
-    # )
+    print(f"Embedding matrix created with size: {dataset_size}")
 
     path = [f"{i}" for i in range(dataset_size)]
     paths_array = np.memmap(
@@ -61,7 +53,9 @@ if cc:
         shape=(dataset_size,),
     )
     paths_array[:] = path[:]
+    print("Paths array created.")
 
+    print("Computing centroids...")
     compute_centroids(
         data=embedding_matrix,
         ncentroids=params["ncentroids"],
@@ -72,18 +66,14 @@ if cc:
         logger=logger,
         verbose=True,
     )
+    print("Centroids computed.")
 
 if asc:
-    dataset_path = "../data/fineweb/sample-350BT/train/0_embedding.jsonl"
-    dataset = Dataset.from_json(dataset_path)
-    embedding_matrix = np.array(dataset["__embedding"])
-
-    # emb_memory = np.memmap(
-    #     emb_memory_loc,
-    #     dtype="float32",
-    #     mode="r",
-    #     shape=(dataset_size, emb_size),
-    # )
+    print("Loading datasets...")
+    dataset = concatenate_datasets([load_from_disk(f"/data/datasets/hf_cache/data/fineweb/sample-350BT/train_bge_micro_embeddings/{i}") for i in range(8)])
+    print("Datasets loaded.")
+    embedding_matrix = np.array(dataset["__embedding"], dtype=np.float32)
+    print("Dataset loaded for sorting clusters.")
 
     paths_memory = np.memmap(
         paths_memory_loc,
@@ -91,7 +81,9 @@ if asc:
         mode="r",
         shape=(dataset_size,),
     )
+    print("Paths memory loaded.")
 
+    print("Assigning and sorting clusters...")
     assign_and_sort_clusters(
         data=embedding_matrix,
         paths_list=paths_memory,
@@ -103,14 +95,15 @@ if asc:
         cluster_ids=range(0, params["ncentroids"]),
         logger=logger,
     )
+    print("Clusters assigned and sorted.")
 
-if epd:
-    eps = 0.6
-    extract_pruned_data(
-        "sorted_clusters",
-        "semdedup/dataframes",
-        eps,
-        params["ncentroids"],
-        "output.txt",
-        retreive_kept_samples=True,
-    )
+# if epd:
+#     eps = 0.6
+#     extract_pruned_data(
+#         "sorted_clusters",
+#         "semdedup/dataframes",
+#         eps,
+#         params["ncentroids"],
+#         "output.txt",
+#         retreive_kept_samples=True,
+#     )

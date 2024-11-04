@@ -24,7 +24,7 @@ import pprint
 from tqdm import tqdm
 import argparse
 from typing import List, Tuple, Union
-from utils import get_logger
+from clustering.utils import get_logger
 
 
 def assign_and_sort_clusters(

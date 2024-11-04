@@ -4,11 +4,11 @@ Kmeans_with_cos_dist: True # True for using cosine similarity for kmeans cluster
 emb_memory_loc: "emb.npy"
 text_emb_memory_loc: None
 paths_memory_loc: "paths.npy"
-sorted_clusters_file_loc: "sorted_clusters"
-save_folder: "cluster_info"
+sorted_clusters_file_loc: "/data/datasets/hf_cache/data/fineweb/sample-350BT/bge_micro_cluster_info/0/sorted_clusters"
+save_folder: "/data/datasets/hf_cache/data/fineweb/sample-350BT/bge_micro_cluster_info/0"
 path_str_type: "S24"
 ncentroids: 1000
-dataset_size: 17585861
+dataset_size: 17585861 # not needed
 emb_size: 384
 niter: 100
 seed: 1234

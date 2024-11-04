@@ -18,7 +18,7 @@ import numpy as np
 import submitit
 import torch
 import yaml
-from utils import get_logger
+from clustering.utils import get_logger
 
 
 def faiss_index_to_gpu(cpu_index):
@@ -105,6 +105,13 @@ def compute_centroids(
 
     if not os.path.exists(kmeans_obj_file_loc):
         start_time = time.time()
+        print(f"Data shape: {data.shape}")
+        print(f"Number of centroids: {ncentroids}")
+        print(f"Number of iterations: {niter}")
+        print(f"Seed: {seed}")
+        print(f"Kmeans with cosine distance: {Kmeans_with_cos_dist}")
+        print(f"Save folder: {save_folder}")
+        print(f"Arguments passed to train: data type: {type(data)}, data shape: {data.shape}")
         kmeans.train(data)
         logger.info(f"Time for clustering (mins): {(time.time()-start_time)/(60):.2f}")
 
